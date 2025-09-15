@@ -1,0 +1,365 @@
+---
+title: "Unplanned Closures SPC Analysis"
+author: "PhODs Team"
+date: "updated: `r format(Sys.Date(), '%b-%Y')`"
+output:
+  xaringan::moon_reader:
+    css: [theme.css, nhsr-fonts.css]
+    self_contained: true
+    lib_dir: libs
+    nature:
+      ratio: '16:9'
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+```{r setup, include=FALSE}
+
+#useful
+#https://vrbiki.github.io/learning-xaringan/NHSRxaringan.html#4
+
+knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
+options(htmltools.dir.version = FALSE)
+
+library(tidyverse)
+source("../items_dispensed_SPC.R")
+pharm_demographics <- readRDS("../data/itemsDispensed/pharm_demographics.rds")
+items_dispensed <- readRDS("../data/data_for_monthly_pack/items_dispensed.rds")
+unplannedClosuresData <- readRDS("../data/data_for_monthly_pack/July22/unplannedClosuresData.rds")
+
+```
+
+
+
+#### New method … Statistical Process Control (SPC)
+
++ SPC indicates whether a process is following normal variation (expected variation) or special cause variation (unexpected variation based on external influences).
++ Rule 1 (yellow on graphs) highlights shows if a data point lies outside of the expected maximum and minimum of the system (3 standard deviations away from the mean)
++ Rule 2 (blue on graphs) highlights if there has been a shift which is picked up if 8 or more points are all consecutively above or below the mean. This indicates that the mean of the system has changed.
+
+
+---
+
+<!-- class: center, middle -->
+
+<!-- # National Level -->
+
+<!-- --- -->
+
+<!-- ### National: SPC on items dispensed per day  -->
+
+<!-- ```{r xaringan-panelset, echo=FALSE} -->
+<!-- xaringanExtra::use_panelset() -->
+<!-- ``` -->
+<!--  <font size="1"> -->
+<!-- .panelset[ -->
+
+<!-- .panel[.panel-name[All pharmacies] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC() -->
+
+<!-- ``` -->
+
+<!-- Nationally, across all pharmacies, there has been a gradual increase in dispensing over the years. -->
+
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies with closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "with") -->
+
+<!-- ``` -->
+
+<!-- Nationally, pharmacies with unplanned closures showed a drop in dispensing after the start of the pandemic. -->
+
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies without closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "without") -->
+
+<!-- ``` -->
+
+
+<!-- Nationally, pharmacies without unplanned closures have seen a gradual increase over the years. -->
+
+<!-- ] -->
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- class: center, middle -->
+
+<!-- # Regional Level -->
+
+<!-- --- -->
+
+<!-- ### London: SPC on items dispensed per day  -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- xaringanExtra::use_panelset() -->
+<!-- ``` -->
+<!--  <font size="1"> -->
+<!-- .panelset[ -->
+
+<!-- .panel[.panel-name[All pharmacies] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(level = "Regional", region_STP_name = "London") -->
+
+<!-- ``` -->
+
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies with closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "with", level = "Regional", region_STP_name = "London") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies without closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "without", level = "Regional", region_STP_name = "London") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- ### East of England: SPC on items dispensed per day  -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- xaringanExtra::use_panelset() -->
+<!-- ``` -->
+<!--  <font size="1"> -->
+<!-- .panelset[ -->
+
+<!-- .panel[.panel-name[All pharmacies] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(level = "Regional", region_STP_name = "East Of England") -->
+
+<!-- ``` -->
+
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies with closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "with", level = "Regional", region_STP_name = "East Of England") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies without closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "without", level = "Regional", region_STP_name = "East Of England") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- ### Midlands: SPC on items dispensed per day  -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- xaringanExtra::use_panelset() -->
+<!-- ``` -->
+<!--  <font size="1"> -->
+<!-- .panelset[ -->
+
+<!-- .panel[.panel-name[All pharmacies] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(level = "Regional", region_STP_name = "Midlands") -->
+
+<!-- ``` -->
+
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies with closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "with", level = "Regional", region_STP_name = "Midlands") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies without closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "without", level = "Regional", region_STP_name = "Midlands") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- ### North East And Yorkshire: SPC on items dispensed per day  -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- xaringanExtra::use_panelset() -->
+<!-- ``` -->
+<!--  <font size="1"> -->
+<!-- .panelset[ -->
+
+<!-- .panel[.panel-name[All pharmacies] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(level = "Regional", region_STP_name = "North East And Yorkshire") -->
+
+<!-- ``` -->
+
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies with closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "with", level = "Regional", region_STP_name = "North East And Yorkshire") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies without closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "without", level = "Regional", region_STP_name = "North East And Yorkshire") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- ### North West: SPC on items dispensed per day  -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- xaringanExtra::use_panelset() -->
+<!-- ``` -->
+<!--  <font size="1"> -->
+<!-- .panelset[ -->
+
+<!-- .panel[.panel-name[All pharmacies] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(level = "Regional", region_STP_name = "North West") -->
+
+<!-- ``` -->
+
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies with closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "with", level = "Regional", region_STP_name = "North West") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies without closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "without", level = "Regional", region_STP_name = "North West") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- ### South East: SPC on items dispensed per day  -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- xaringanExtra::use_panelset() -->
+<!-- ``` -->
+<!--  <font size="1"> -->
+<!-- .panelset[ -->
+
+<!-- .panel[.panel-name[All pharmacies] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(level = "Regional", region_STP_name = "South East") -->
+
+<!-- ``` -->
+
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies with closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "with", level = "Regional", region_STP_name = "South East") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies without closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "without", level = "Regional", region_STP_name = "South East") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- ] -->
+
+<!-- --- -->
+
+<!-- ### South West: SPC on items dispensed per day  -->
+
+<!-- ```{r echo=FALSE} -->
+<!-- xaringanExtra::use_panelset() -->
+<!-- ``` -->
+<!--  <font size="1"> -->
+<!-- .panelset[ -->
+
+<!-- .panel[.panel-name[All pharmacies] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(level = "Regional", region_STP_name = "South West") -->
+
+<!-- ``` -->
+
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies with closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "with", level = "Regional", region_STP_name = "South West") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- .panel[.panel-name[Pharmacies without closures] -->
+<!-- ```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'} -->
+
+<!-- plot_items_dispensed_SPC(withClosures = "without", level = "Regional", region_STP_name = "South West") -->
+
+<!-- ``` -->
+<!-- ] -->
+<!-- ] -->
+
+
+```{r include=FALSE}
+STPs <- dput(levels(factor(pharm_demographics$STP_Name)))
+
+```
+
+
+```{r include=FALSE}
+
+tryCatch({for (i in 1:length(STPs)) {
+  value.to.match <- STPs[i]
+  out = c(out, knitr::knit_expand('STP_loop.Rmd'))
+  print(i)}
+  }
+,
+  {error=function(e) next
+})
+
+```
+
+`r paste(knitr::knit(text = out), collapse = '\n')`
+
+---
+#### Discussion
+
++ N.B. This analysis excludes DAC, DSP, LSP, Dispensing Doctors, Appliance or Abated contracts
++ The SPC analysis shows that pharmacies that have reported unplanned closures in the period that we have data for (Oct 21 – Feb 22), have seen a statistically significant drop in dispensing since April 2020, compared with pharmacies that have not reported a closure which have been seeing a gradual increase in dispensing.
++ There is insufficient data to attribute this drop in dispensing to unplanned closures alone and may just be another symptom of struggling pharmacies. 
++ Therefore we can say that on a national scale, pharmacies reporting unplanned closures in the period that we have data for, have show a drop in dispensing since the beginning of the pandemic. However, we cannot attribute this to unplanned closures.
++ Although this drop is statistically significant, this may not be practically/clinically significant as it appears to be a drop from a mean of around 250 items dispensed per pharmacy per day to a mean of around 225 items dispensed per pharmacy per day. This analysis also does not show whether these “missed” items are being dispensed elsewhere (e.g. a nearby pharmacy. 

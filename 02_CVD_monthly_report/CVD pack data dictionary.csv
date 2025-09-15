@@ -1,0 +1,53 @@
+Column Name,Description
+Month,Reporting month
+Fcode,Pharmacy contractor code
+Total_patients,Total number of patients being checked via this service in the reporting month
+min_patient_age,Minimum age of all patients 
+Avg_patient_age,Average age of all patients
+max_patient_age,Maximum age of all patients
+ContractorName,Pharmacy contractor name
+Region_Name,Region Name
+ICB,ICB code (Previously known as STP code)
+ICB_Name,ICB Names (Previously know as STP name)
+IMD_Decile,IMD Decile 2019 (based on pharmacy postcode)
+Total_checks,Total number of checks (including opportunistic and referred blood pressure checks and ABPM checks)
+5BP?,If contractor has delivered at least 5 blood pressure checks in the reporting month? (True = Yes; False = No)
+5BP+1ABPM,If contractor has delivered at least 5 blood pressure checks and 1 ABPM in the reporting month? (True = Yes; False = No)
+Opportunistic_BP_checks,Total number of opportunistic blood pressure checks in the reporting month
+Avg_oppBP_patient_age,Average age of all opportunistic BP check patients
+BP_Opp_over40,Total number of opportunistic blood pressure checks on patients aged 40 and over
+%BPopp_over40,Precentage of opportunistic blood pressure checks on patients aged 40 and over
+BPopp_result_low,Total number of opportunistic blood pressure checks with low reading results (a blood pressure of 90/60mmHg or lower)
+BPopp_result_veryhigh,Total number of opportunistic blood pressure checks with very high reading results (a blood pressure of 180/120mmHg or higher)
+Bpopp_result_high,"Total number of opportunistic blood pressure checks with both systolic and diastolic readings that are high (a blood pressure of 140/90mmHg or higher, but lower than 180/120mmHg). These patients are suitable for ABPM follow up."
+BPopp_result_refer,"Total number of opportunistic blood pressure checks that either had a high systolic reading (>=140mmHg) or a high diastolic reading (>=90mmHg), but not both readings are high. These patients are also suitable for ABPM follow up."
+Bpopp_result_normal,Total number of opportunistic blood pressure checks with normal reading results  (a blood pressure lower than 140/90mmHg and higher than 90/60mmHg)
+BPopp_result_other,Total number of opportunistic blood pressure checks with any other reading results
+Refer_BP_checks,Total number of blood pressure checks via referral (e.g. GP referred) in the reporting month
+Avg_BPref_age,Average age of all referred BP check patients
+BP_ref_over40,Total number of referred blood pressure checks on patients aged 40 and over
+%BPref_over40,Precentage of referred blood pressure checks on patients aged 40 and over
+BPref_result_low,Total number of referred blood pressure checks with low reading results (a blood pressure of 90/60mmHg or lower)
+BPref_result_veryhigh,Total number of referred blood pressure checks with very high reading results (a blood pressure of 180/120mmHg or higher)
+BPref_result_high,"Total number of referred blood pressure checks with both systolic and diastolic readings that are high (a blood pressure of 140/90mmHg or higher, but lower than 180/120mmHg). These patients are suitable for ABPM follow up"
+BPopp_result_refer,"Total number of referred blood pressure checks that either had a high systolic reading (>=140mmHg) or a high diastolic reading (>=90mmHg), but not both readings are high. These patients are also suitable for ABPM follow up."
+Bpopp_result_normal,Total number of referred blood pressure checks with normal reading results (a blood pressure lower than 140/90mmHg and higher than 90/60mmHg)
+BPref_result_other,Total number of referred blood pressure checks with any other reading results
+Opportunistic_ABPM,Total number of opportunistic ABPM checks in the reporting month
+Avg_ABPMopp_age,Average age of all opportunistic ABPM check patients
+ABPMopp_result_low,Total number of opportunistic ABPM checks with low reading results (a 24-hour average blood pressure of 90/60mmHg or lower)
+ABPMopp_result_normal,Total number of opportunistic ABPM checks with normal reading results (a 24-hour average blood pressure of lower than 135/85mmHg and higher than 90/60mmHg)
+ABPMopp_result_Stage1,Total number of opportunistic ABPM checks with stage 1 results (a 24-hour average blood pressure of 135/85mmHg or higher but lower than 150/95mmHg)
+ABPMopp_result_Stage2,Total number of opportunistic ABPM checks with stage 2 results (a 24-hour average blood pressure of 150/95mmHg but lower than 170/115)
+ABPMopp_result_Severe,Total number of opportunistic ABPM checks indicating severe hypertension (a 24-hour average blood pressure of 170/115mmHg or higher)
+ABPMopp_result_other,Total number of opportunistic ABPM checks with any other reading results
+Refer_ABPM,Total number of ABPM via referral (e.g. GP referred) in the reporting month
+Avg_ABPMref_age,Average age of all referred ABPM check patients
+ABPMref_result_low,Total number of referred ABPM checks with low reading results (a 24-hour average blood pressure of 90/60mmHg or lower)
+ABPMref_result_normal,Total number of referred ABPM checks with normal reading results (a 24-hour average blood pressure of lower than 135/85mmHg and higher than 90/60mmHg)
+ABPMref_result_Stage1,Total number of referred ABPM checks with stage 1 results (a 24-hour average blood pressure of 135/85mmHg or higher but lower than 150/95mmHg)
+ABPMref_result_Stage2,Total number of referred ABPM checks with stage 2 results (a 24-hour average blood pressure of 150/95mmHg but lower than 170/115)
+ABPMref_result_Severe,Total number of referred ABPM checks indicating severe hypertension (a 24-hour average blood pressure of 170/115mmHg or higher)
+ABPMref_result_other,Total number of referred ABPM checks with any other reading results
+ABPM_asFollowUpOfBPopp,Total number of ABPM checks following opportunistic BP checks with results that are suitable for followup
+ABPM_asFollowUpOfReferredBP,Total number of ABPM checks following referred BP checks with results that are suitable for followup

@@ -73,7 +73,7 @@ bp_act<-bp_act%>%filter(!is.na(`Total Checks`))
 update = format(Sys.Date(), '%B%Y')
 tab_name<- list('BP activity'= bp_act,
                 'BP signup'=distinct(subset(pull_cvd(), select = c(`Fcode`,	`IMD_Decile`,	`Signup_Month`,	`ProvidingService?`))))
-openxlsx::write.xlsx(tab_name, file = paste0('~/Rprojects/CVD-reporting/reports\\Pharmacy_BPCS_', update, '.xlsx')) 
+openxlsx::write.xlsx(tab_name, file = paste0('~/Rprojects/PhOD_pharmacy_reporting_simplified/Producing_outputs_4_sharing/Outputs\\Pharmacy_BPCS_', update, '.xlsx')) 
 
 ##### SCS, OC and PF since launch ----
 sql=" 
@@ -111,6 +111,6 @@ otherServ<-otherServ%>%
   mutate(`Month(Claim)`=as.character(format(`Month(Claim)`, "%Y-%m-%d")))
 
 
-write.csv(otherServ,paste0('~/Rprojects/CVD-reporting/reports\\OC SCS and PF activity data_', update, '.csv'), row.names = FALSE)
+write.csv(otherServ,paste0('~/Rprojects/PhOD_pharmacy_reporting_simplified/Producing_outputs_4_sharing/Outputs\\OC SCS and PF activity data_', update, '.csv'), row.names = FALSE)
 
 

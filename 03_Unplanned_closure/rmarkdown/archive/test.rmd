@@ -1,0 +1,332 @@
+---
+title: "Unplanned Pharmacy Closures Monthly Pack"
+subtitle: "National"
+date: "`r paste(format(Sys.time(), '%B, %Y'), ' - Reporting up to end of', format(Sys.Date() - lubridate::weeks(5), '%B, %Y'))`"
+output:
+  xaringan::moon_reader:
+    css: [theme.css, nhsr-fonts.css]
+    self_contained: true
+    lib_dir: libs
+    nature:
+      ratio: '16:9'
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(readxl)
+library(DBI)
+library(odbc)
+library(reactable) #make sure you have the latest version by doing install.packages("reactable")
+library(downloadthis)
+library(sf) 
+library(tmap)
+library(readr)
+library(stringr)
+library(leaflet)
+
+source("../monthly_pack_graphs.R")
+
+#load in data
+
+# items_dispensed <- readRDS("N:/_Everyone/Primary Care Group/Unplanned Closures PHARM-2022_23-003/Data files for monthly pack/items_dispensed.rds")
+items_dispensed <- pull_raw_items_dispensed_NCDR()
+Ref_Contractor <- readRDS("N:/_Everyone/Primary Care Group/Unplanned Closures PHARM-2022_23-003/Data files for monthly pack/Ref_Contractor.rds")
+Ref_PharmList1 <- readRDS("N:/_Everyone/Primary Care Group/Unplanned Closures PHARM-2022_23-003/Data files for monthly pack/Ref_PharmList1.rds")
+unplannedClosuresData <- readRDS("N:/_Everyone/Primary Care Group/Unplanned Closures PHARM-2022_23-003/Collated data/unplannedClosuresData.rds")
+eps_nominations <- read_excel("N:/_Everyone/Primary Care Group/Unplanned Closures PHARM-2022_23-003/Data files for monthly pack/eps_nom_report+220722.xlsx", 
+                              sheet = "Dispenser Nominations")
+eps_nominations <- eps_nominations %>%
+  select(ODS.CODE = `ODS Code`, eps_nominations = "Current Active Nominations")
+
+nearest_pharm <- readRDS("N:/_Everyone/Primary Care Group/Unplanned Closures PHARM-2022_23-003/Data files for monthly pack/nearest_pharm.rds")
+pharmlist <- readRDS("N:/_Everyone/Primary Care Group/Unplanned Closures PHARM-2022_23-003/Data files for monthly pack/pharmlist.rds")
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+#avoid standard form
+options(scipen=999)
+
+# Suppress summarise info
+options(dplyr.summarise.inform = FALSE)
+
+```
+
+
+name: contents
+### Contents  
+
+ <font size="4">
+
+ * [Summary statistics](#summary)
+ * [Number of Unplanned Pharmacy Closures By Region](#number-of-closures)
+ * [Number of Unplanned Closures per 100 Pharmacies By Region](#number-of-closures-per-pharm)
+ * [Total Duration of Unplanned Pharmacy Closures By Region](#duration-of-closures)
+ * [Percentage of closures under 4 hours by Region](#perc-under-4hrs)
+ * [Number of Unplanned Pharmacy Closures By Organisation](#number-of-closures-org)
+ * [Number of Unplanned Closures per 100 Pharmacies By Organisation](#number-of-closures-per-pharm-org)
+ * [Total Duration of Unplanned Pharmacy Closures By Organisation](#duration-of-closures-org)
+ * [Percentage of closures under 4 hours by Organisation](#perc-under-4hrs-org)
+ * [Reasons for Unplanned Closure](#reason-for-closure)
+ * [Unplanned closures per pharmacy by chain](#closures-per-pharm)
+ * [Percentage of pharmacies with at least one closure by chain](#at-least-one-closure)
+ * [Total closure duration Vs Distance to next nearest pharmacy](#scatter)
+ * [Total closure duration Vs Number of EPS nominations](#scatter-eps)
+ * [Closure rate by deprivation](#imd)
+ * [Impact on dispensing](#spc)
+
+
+<font size="1">
+#### NOTE 
+This is an interactive markdown report.  You can navigate from slide to slide by either clicking the mouse on the screen or by using the cursor keys.  **Press ? for help.** Some pages have selection buttons across regions, click on the region in order to explore the data for that area.  
+
+---
+
+### Note on data collection and completeness
+
+<font size="2">
+
+Data is collected from regional and sub-regional teams on a monthly basis. Not all of this data comes through to us at NHS England at the same time and therefore at various points in the month data from certain areas may be missing. 
+
+The regional and sub-regional areas that send in data are as follows:
+Full regions:
+* East of England
+* London
+* South East 
+* South West
+
+Sub regions:
+* East Midlands
+* West Midlands
+* North East and North Cumbria
+* Humber Coast and Vale
+* South Yorkshire and Bassetlaw
+* West Yorkshire
+* Cheshire and Merseyside
+* Greater Manchester
+* Lancashire and South Cumbria
+
+<font size="3">
+
+---
+name: summary
+
+### Summary statistics
+
+ <font size="2">
+
+* Anecdotal evidence suggests that unplanned closures are under-reported. Therefore, figures in this pack must be taken as an under-estimate.
+
+* Out of the 11,263 active pharmacies in England, **`r n_distinct(unplannedClosuresData$ODS.CODE)`** (**`r round(n_distinct(unplannedClosuresData$ODS.CODE)*100/11263,1)`**%) have reported at least one unplanned closure since October 2021 (the month data collection for closures began).
+
+* From October 2021 to `r format(Sys.Date() - lubridate::weeks(5), '%B, %Y')`, the number of closures per pharmacy has been over 2 and a half times higher for 100hr pharmacies than for 40hr pharmacies.
+
+* From October 2021 to `r format(Sys.Date() - lubridate::weeks(5), '%B, %Y')`, the number of closures per pharmacy in each IMD decile has been variable across regions with no clear trend relating deprivation to number of unplanned closures.
+
+* `r format(Sys.Date() - lubridate::weeks(5), '%B, %Y')` has seen a **34%** increase in number of reported unplanned closures compared with `r format(Sys.Date() - lubridate::weeks(5), '%B')` last year.
+
+* In `r format(Sys.Date() - lubridate::weeks(5), '%B, %Y')` the South West has seen the highest number of reported unplanned closures per pharmacy across the country. The ICB with the highest number of closures per pharmacy is Norfolk and Waveney which are averaging 1.2 closures per pharmacy in `r format(Sys.Date() - lubridate::weeks(5), '%B, %Y')`.
+
+* Up until July 2022, Lloyds had the highest number of unplanned closures per pharmacy across the country out of the large multiples. In July 2022 up to October 2022, Tesco has the highest number of unplanned closures per pharmacy.
+
+* The most common reason for closure is "locum could not be found".
+
+* On average, pharmacies that have reported a closure, have seen a decrease in dispensing activity by 25 items per pharmacy per day.
+
+
+---
+name: number-of-closures
+
+### Number of Unplanned Pharmacy Closures
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "National",
+                       region_STP_name = NULL,
+                       per_100_pharms = FALSE)
+```
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "South East",
+                       per_100_pharms = FALSE)
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "South West",
+                       per_100_pharms = FALSE)
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "North West",
+                       per_100_pharms = FALSE)
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "North East And Yorkshire",
+                       per_100_pharms = FALSE)
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "London",
+                       per_100_pharms = FALSE)
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "Midlands",
+                       per_100_pharms = FALSE)
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "East Of England",
+                       per_100_pharms = FALSE)
+```
+
+
+ ]
+ .panel[.panel-name[Data]
+
+<font size="1">
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=5}
+
+data <- get_closures_by_STP_table(unplannedClosuresData)
+
+data %>%
+  download_this(
+    output_name = "closures_by_stp",
+    output_extension = ".xlsx",
+    button_label = "Download data",
+    button_type = "warning",
+    has_icon = TRUE,
+    icon = "fa fa-save"
+  )
+```
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5}
+reactable(
+  get_closures_by_STP_table(unplannedClosuresData),
+  filterable = TRUE,
+  #paginateSubRows = TRUE,
+  minRows = 5,
+  highlight = TRUE,
+  height = 450,
+  groupBy = c("Region Name", "STP Name"),
+  columns = list(
+    `Oct21`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE),
+    `Nov21`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE),
+    `Dec21`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE),
+    `Jan22`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE),
+    `Feb22`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE),
+    `Mar22`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE),
+    `Apr22`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE),
+    `May22`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE),
+    `Jun22`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE)
+  )
+)
+```
+]
+]
+
+[Return to contents](#contents)
+
+---
+
+name: number-of-closures-per-pharm
+
+### Closures map
+
+```{r  echo=FALSE}
+
+
+pharmacy_postcode_coords <- readRDS("../data/geo_spatial_data/pharmacy_postcode_coords.rds")
+
+Unplanned_closures_durations_pharmacy_level <- read_excel("../data/mapping/Unplanned_closures_durations_pharmacy_level.xlsx")
+
+names(Unplanned_closures_durations_pharmacy_level) <- names(Unplanned_closures_durations_pharmacy_level) %>% make.names()
+
+pharmacy_postcode_coords  <- pharmacy_postcode_coords  %>%
+  select(ODS.Code = contractor_code,
+         postcode,
+         oseast1m,
+         osnrth1m)
+
+#filter out pharmacies with no postcode data - means that they are not on the pharm list and must have closed
+#There are three pharmacies with postcodes that do not map to an ONS coordinate
+Unplanned_closures_durations_pharmacy_level <- Unplanned_closures_durations_pharmacy_level %>%
+  left_join(pharmacy_postcode_coords, by = "ODS.Code") %>%
+  filter(!is.na(postcode) & !is.na(oseast1m)) 
+
+#make into shape file
+closures_sf <- sf::st_as_sf(x = Unplanned_closures_durations_pharmacy_level, coords = c("oseast1m", "osnrth1m"), crs = 27700)
+
+
+
+
+
+#get boundaries 
+ICB_boundaries <- sf::st_read("../data/geo_spatial_data/GI2740_Download_ICB_Boundaries/GI2740_Download_ICB_Boundaries.shp", quiet = TRUE)
+region_boundaries <- sf::st_read("../data/geo_spatial_data/GI2740_Download_NHSE_Region_Boundaries/GI2740_Download_NHSE_Region_Boundaries.shp", quiet = TRUE)
+
+tmap::tmap_options(check.and.fix = TRUE)
+
+tmap::tmap_leaflet(tm_shape(closures_sf) +
+  tm_dots(col = "colour", palette = c(Amber='yellow', Red='red',Green='green')) +
+  tm_shape(ICB_boundaries) +
+  tm_borders(col = "grey40", lwd = 2, lty = "solid", alpha = NA))
+```
+
+
+[Return to contents](#contents)
+

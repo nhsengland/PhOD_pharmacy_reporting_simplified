@@ -1,0 +1,14 @@
+
+.inverse, .hljs-github {
+  background-image: url(backgrounds/slide_background_NHS_blank.PNG); /* Change this to the url of the image you want as your background */
+  background-size: contain;
+}
+
+.title-slide {
+  background-image: url(backgrounds/NHS_blank_ppt_cover_blank.PNG);
+  background-size: cover;
+}
+
+.panelset .panel-active {
+display: block !important;
+}

@@ -1,0 +1,1165 @@
+---
+title: "Unplanned Pharmacy Closures Monthly Pack - EXTERNAL USE"
+subtitle: "National"
+#subtitle: "National - No Mar24 data for East Midland in this update"
+date: "`r paste(format(Sys.time(), '%B, %Y'), ' - Reporting up to end of', format(Sys.Date() - lubridate::weeks(5), '%B, %Y'))`"
+output:
+  xaringan::moon_reader:
+    self_contained: TRUE
+    css: [theme_external.css, nhsr-fonts.css]
+    lib_dir: libs
+    nature:
+      ratio: '16:9'
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(readxl)
+library(DBI)
+library(odbc)
+library(reactable) #make sure you have the latest version by doing install.packages("reactable")
+library(downloadthis)
+
+knitr::opts_chunk$set(
+	echo = FALSE,
+	message = FALSE,
+	warning = FALSE
+)
+#avoid standard form
+options(scipen=999) 
+
+# Suppress summarise info
+options(dplyr.summarise.inform = FALSE)
+
+```
+
+
+name: contents
+### Contents  
+
+ <font size="4">
+
+ * [Number of Unplanned Pharmacy Closures By Region](#number-of-closures)
+ * [Number of Unplanned Closures per 100 Pharmacies By Region](#number-of-closures-per-pharm)
+ * [Total Duration of Unplanned Pharmacy Closures By Region](#duration-of-closures)
+ * [Percentage of closures under 4 hours by Region](#perc-under-4hrs)
+ * [Reasons for Unplanned Closure Timeseries](#reason-for-closure-timeseries)
+ * [Total closure duration Vs Distance to next nearest pharmacy](#scatter)
+ * [Total closure duration Vs Number of EPS nominations](#scatter-eps)
+ * [Closure rate by deprivation](#imd)
+ * [Impact on dispensing](#spc)
+
+
+<font size="1">
+#### NOTE 
+This is an interactive markdown report.  You can navigate from slide to slide by either clicking the mouse on the screen or by using the cursor keys.  **Press ? for help.** Some pages have selection buttons across regions, click on the region in order to explore the data for that area.  
+
+---
+
+### Note on data collection and completeness
+
+<font size="2">
+
+Data is collected from regional and sub-regional teams on a monthly basis. Not all of this data comes through to us at NHS England at the same time and therefore at various points in the month data from certain areas may be missing. It will be made obvious in the report if any data is known to be missing. 
+
+In some case, regions or sub-regions may send in updated data for previous months which is usually due to late declaration of unplanned closures by contractors. Therefore, historic data may be amended month on month if any updated data is sent in.
+
+The regional and sub-regional areas that send in data are as follows:
+Full regions:
+* East of England
+* London
+* South East 
+* South West
+
+Sub regions:
+* East Midlands
+* West Midlands
+* North East and North Cumbria
+* Humber and North Yorkshire
+* South Yorkshire
+* West Yorkshire
+* Cheshire and Merseyside
+* Greater Manchester
+* Lancashire and South Cumbria
+
+N.B. DAC contracts have been excluded from any analysis in this pack. 
+
+
+
+---
+
+name: number-of-closures
+
+### Number of Unplanned Pharmacy Closures
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "National",
+                       region_STP_name = NULL,
+                       per_100_pharms = FALSE)
+```
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "South East",
+                       per_100_pharms = FALSE)
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "South West",
+                       per_100_pharms = FALSE)
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "North West",
+                       per_100_pharms = FALSE)
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "North East And Yorkshire",
+                       per_100_pharms = FALSE)
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "London",
+                       per_100_pharms = FALSE)
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "Midlands",
+                       per_100_pharms = FALSE)
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "East Of England",
+                       per_100_pharms = FALSE)
+```
+
+
+ ]
+ .panel[.panel-name[Data]
+
+<font size="1">
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=5}
+
+data <- get_closures_by_STP_table(unplannedClosuresData)
+
+data %>%
+  download_this(
+    output_name = "closures_by_stp",
+    output_extension = ".xlsx",
+    button_label = "Download data",
+    button_type = "warning",
+    has_icon = TRUE,
+    icon = "fa fa-save"
+  )
+```
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5}
+reactable(
+  get_closures_by_STP_table(unplannedClosuresData, externalUse = TRUE),
+  filterable = TRUE,
+  #paginateSubRows = TRUE,
+  minRows = 5,
+  highlight = TRUE,
+  height = 450,
+  groupBy = c("Month of Closure","Region Name", "ICB Name"),
+  columns = list(
+    `Number of closures`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE)
+  )
+)
+```
+]
+]
+
+
+[Return to contents](#contents)
+
+
+---
+
+name: number-of-closures-per-pharm
+
+### Number of Unplanned Closures per 100 Pharmacies
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month_per100pharm(unplannedClosuresData,
+                       level = "National",
+                       region_STP_name = NULL,
+                       per_100_pharms = TRUE)
+```
+This graph shows the number of unplanned closures per 100 pharmacies in each region or STP so that the volumes are comparable.
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month_per100pharm(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "South East",
+                       per_100_pharms = TRUE)
+```
+This graph shows the number of unplanned closures per 100 pharmacies in each region or STP so that the volumes are comparable.
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month_per100pharm(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "South West",
+                       per_100_pharms = TRUE)
+```
+This graph shows the number of unplanned closures per 100 pharmacies in each region or STP so that the volumes are comparable.
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month_per100pharm(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "North West",
+                       per_100_pharms = TRUE)
+```
+This graph shows the number of unplanned closures per 100 pharmacies in each region or STP so that the volumes are comparable.
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month_per100pharm(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "North East And Yorkshire",
+                       per_100_pharms = TRUE)
+```
+This graph shows the number of unplanned closures per 100 pharmacies in each region or STP so that the volumes are comparable.
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month_per100pharm(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "London",
+                       per_100_pharms = TRUE)
+```
+
+This graph shows the number of unplanned closures per 100 pharmacies in each region or STP so that the volumes are comparable.
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month_per100pharm(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "Midlands",
+                       per_100_pharms = TRUE)
+```
+This graph shows the number of unplanned closures per 100 pharmacies in each region or STP so that the volumes are comparable.
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closures_by_month_per100pharm(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "East Of England",
+                       per_100_pharms = TRUE)
+```
+This graph shows the number of unplanned closures per 100 pharmacies in each region or STP so that the volumes are comparable.
+
+].panel[.panel-name[Data]
+
+<font size="1">
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=5}
+
+data <- get_closures_per_100_pharms_by_STP_table(unplannedClosuresData)
+
+data %>%
+  download_this(
+    output_name = "closures_per_100_pharms_by_stp",
+    output_extension = ".xlsx",
+    button_label = "Download data",
+    button_type = "warning",
+    has_icon = TRUE,
+    icon = "fa fa-save"
+  )
+```
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5}
+reactable(
+  get_closures_per_100_pharms_by_STP_table(unplannedClosuresData),
+  filterable = TRUE,
+  #paginateSubRows = TRUE,
+  minRows = 5,
+  highlight = TRUE,
+  height = 450,
+  groupBy = c("Month of Closure", "Region Name", "ICB Name"),
+  columns = list(
+    `Closures per 100 pharmacies`= colDef(aggregate = "mean", format = colFormat(digits = 0), filterable = FALSE)
+  )
+)
+```
+]
+]
+
+
+[Return to contents](#contents)
+
+
+---
+name: duration-of-closures
+
+### Total Duration of Unplanned Pharmacy Closures
+
+```{r echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_total_duration_of_closures(unplannedClosuresData)
+```
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_total_duration_of_closures(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "South East")
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_total_duration_of_closures(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "South West")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_total_duration_of_closures(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "North West")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_total_duration_of_closures(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "North East And Yorkshire")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_total_duration_of_closures(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "London")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_total_duration_of_closures(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "Midlands")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_total_duration_of_closures(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "East Of England")
+```
+
+
+ ]
+]
+
+
+[Return to contents](#contents)
+
+
+
+---
+
+name: perc-under-4hrs
+
+### Percentage of closures under 4hrs by region
+
+```{r echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_perc_closures_under_4hrs(data = unplannedClosuresData,
+                                         level = "National",
+                                         region_STP_name = NULL,
+                                         plotChart = TRUE)
+```
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_perc_closures_under_4hrs(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "South East")
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_perc_closures_under_4hrs(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "South West")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_perc_closures_under_4hrs(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "North West")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_perc_closures_under_4hrs(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "North East And Yorkshire")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_perc_closures_under_4hrs(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "London")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_perc_closures_under_4hrs(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "Midlands")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_perc_closures_under_4hrs(unplannedClosuresData,
+                       level = "Regional",
+                       region_STP_name = "East Of England")
+```
+
+
+ ]
+]
+
+[Return to contents](#contents)
+
+
+
+---
+
+name: reason-for-closure-timeseries
+
+### Reasons for Unplanned Closures Timeseries
+
+```{r echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_reason_for_closure_timeseries(
+                        level = "National",
+                        region_STP_name = NULL)
+```
+This graph shows the reason for closure based on a drop-down selection. 
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_reason_for_closure_timeseries(
+                        level = "Regional",
+                        region_STP_name = "South East")
+```
+This graph shows the reason for closure based on a drop-down selection. 
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_reason_for_closure_timeseries(
+                        level = "Regional",
+                        region_STP_name = "South West")
+```
+This graph shows the reason for closure based on a drop-down selection. 
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_reason_for_closure_timeseries(
+                        level = "Regional",
+                        region_STP_name = "North West")
+```
+This graph shows the reason for closure based on a drop-down selection. 
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_reason_for_closure_timeseries(
+                        level = "Regional",
+                        region_STP_name = "North East And Yorkshire")
+```
+This graph shows the reason for closure based on a drop-down selection. 
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_reason_for_closure_timeseries(
+                        level = "Regional",
+                        region_STP_name = "London")
+```
+
+
+This graph shows the reason for closure based on a drop-down selection. 
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_reason_for_closure_timeseries(
+                        level = "Regional",
+                        region_STP_name = "Midlands")
+```
+This graph shows the reason for closure based on a drop-down selection. 
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_reason_for_closure_timeseries(
+                        level = "Regional",
+                        region_STP_name = "East Of England")
+```
+This graph shows the reason for closure based on a drop-down selection. 
+
+ ]
+]
+
+[Return to contents](#contents)
+
+
+
+---
+
+name: scatter
+
+### Total closure duration Vs Distance to next nearest pharmacy
+
+```{r echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_nearest_pharm_dist(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "National",
+                        region_STP_name = NULL,
+                        external_view = TRUE)
+```
+
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies that are the furthest from the next nearest
+pharmacy are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_nearest_pharm_dist(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "South East",
+                        external_view = TRUE)
+```
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies that are the furthest from the next nearest
+pharmacy are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_nearest_pharm_dist(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "South West",
+                        external_view = TRUE)
+```
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies that are the furthest from the next nearest
+pharmacy are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_nearest_pharm_dist(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "North West",
+                        external_view = TRUE)
+```
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies that are the furthest from the next nearest
+pharmacy are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_nearest_pharm_dist(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "North East And Yorkshire",
+                        external_view = TRUE)
+```
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies that are the furthest from the next nearest
+pharmacy are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_nearest_pharm_dist(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "London",
+                        external_view = TRUE)
+```
+
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies that are the furthest from the next nearest
+pharmacy are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_nearest_pharm_dist(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "Midlands",
+                        external_view = TRUE)
+```
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies that are the furthest from the next nearest
+pharmacy are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_nearest_pharm_dist(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "East Of England",
+                        external_view = TRUE)
+```
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies that are the furthest from the next nearest
+pharmacy are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+
+ ]
+]
+
+
+[Return to contents](#contents)
+
+
+
+---
+name: scatter-eps
+
+### Total closure duration Vs EPS nominations
+
+```{r echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_eps_nom(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "National",
+                        region_STP_name = NULL,
+                        external_view = TRUE)
+```
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies with the highest number of EPS nominations are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_eps_nom(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "South East",
+                        external_view = TRUE)
+```
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies with the highest number of EPS nominations are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_eps_nom(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "South West",
+                        external_view = TRUE)
+```
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies with the highest number of EPS nominations are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_eps_nom(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "North West",
+                        external_view = TRUE)
+```
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies with the highest number of EPS nominations are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_eps_nom(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "North East And Yorkshire",
+                        external_view = TRUE)
+```
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies with the highest number of EPS nominations are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_eps_nom(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "London",
+                        external_view = TRUE)
+```
+
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies with the highest number of EPS nominations are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_eps_nom(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "Midlands",
+                        external_view = TRUE)
+```
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies with the highest number of EPS nominations are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_duration_vs_eps_nom(Month = max(unplannedClosuresData$month_of_closure),
+                        level = "Regional",
+                        region_STP_name = "East Of England",
+                        external_view = TRUE)
+```
+The purpose of this graph is to identify pharmacies that potentially have the most cause for concern. The pharmacies with the highest number of EPS nominations are more at-risk of causing patient harm by closing as are the pharmacies with the highest total closure duration. Some of these pharmacies have been labeled on the graph to be investigated further.
+
+ ]
+]
+
+[Return to contents](#contents)
+
+
+---
+name: imd
+
+### Closure rate by deprivation
+
+```{r echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+get_closures_by_IMD_and_region(
+                        level = "National",
+                        region_STP_name = NULL,
+                        data_month = max(unplannedClosuresData$month_of_closure))
+```
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+get_closures_by_IMD_and_region(
+                        level = "Regional",
+                        region_STP_name = "South East",
+                        data_month = max(unplannedClosuresData$month_of_closure))
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+get_closures_by_IMD_and_region(
+                        level = "Regional",
+                        region_STP_name = "South West",
+                        data_month = max(unplannedClosuresData$month_of_closure))
+```
+
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+get_closures_by_IMD_and_region(
+                        level = "Regional",
+                        region_STP_name = "North West",
+                        data_month = max(unplannedClosuresData$month_of_closure))
+```
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+get_closures_by_IMD_and_region(
+                        level = "Regional",
+                        region_STP_name = "North East And Yorkshire",
+                        data_month = max(unplannedClosuresData$month_of_closure))
+```
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+get_closures_by_IMD_and_region(
+                        level = "Regional",
+                        region_STP_name = "London",
+                        data_month = max(unplannedClosuresData$month_of_closure))
+```
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+get_closures_by_IMD_and_region(
+                        level = "Regional",
+                        region_STP_name = "Midlands",
+                        data_month = max(unplannedClosuresData$month_of_closure))
+```
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+get_closures_by_IMD_and_region(
+                        level = "Regional",
+                        region_STP_name = "East Of England",
+                        data_month = max(unplannedClosuresData$month_of_closure))
+```
+
+ ]
+]
+
+[Return to contents](#contents)
+
+
+
+---
+name: spc
+
+### Note on Statistical Process Control (SPC) analysis
+
+ <font size="2">
+The next slide looks as the impact of unplanned closures on dispensing using SPC analysis.
+
+SPC indicates whether a process is following normal variation (expected variation) or special cause variation (unexpected variation based on external influences).
+* Rule 1 (yellow on graphs) highlights shows if a data point lies outside of the expected maximum and minimum of the system (3 standard deviations away from the mean)
+* Rule 2 (blue on graphs) highlights if there has been a shift which is picked up if 8 or more points are all consecutively above or below the mean. This indicates that the mean of the system has changed.
+
+Assumptions / points to note:
+* The following analysis excludes DAC, DSP, LSP contracts.
+* The "observation period" is the period that we have unplanned closures data for. That will be October 2021 to the current month.
+* The dispensing data has a three month lag, so the most up to date data will be from three months ago.
+
+Conclusions from next slide:
+* The SPC analysis shows that pharmacies that have reported unplanned closures in the period that we have data for, have seen a statistically significant drop in dispensing since April 2020, compared with pharmacies that have not reported a closure which have been seeing a gradual increase in dispensing.
+* There is insufficient data to attribute this drop in dispensing to unplanned closures alone and may just be another symptom of struggling pharmacies.
+* Therefore we can say that on a national and regional scale, pharmacies reporting unplanned closures in the period that we have data for, have shown a drop in dispensing since the beginning of the pandemic.
+* Although this drop is statistically significant, this may not be practically/clinically significant as it appears to be a drop from a mean of around 250 items dispensed per pharmacy per day to a mean of around 235 items dispensed per pharmacy per day (so a drop of 15 items per pharmacy per day). This analysis also does not show whether these “missed” items are being dispensed elsewhere (e.g. a nearby pharmacy.)
+
+
+---
+
+#### Impact on dispensing
+
+```{r echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=7, fig.align='center'}
+plot_items_spc_facet(unplanned_closures_data = unplannedClosuresData,
+                           items_data = items_dispensed,
+                           contractor_table = Ref_Contractor,
+                           level = "National",
+                           region_STP_name = NULL,
+                           plotChart = TRUE)
+```
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=7, fig.align='center'}
+plot_items_spc_facet(unplanned_closures_data = unplannedClosuresData,
+                           items_data = items_dispensed,
+                           contractor_table = Ref_Contractor,
+                           level = "Regional",
+                           region_STP_name = "South East",
+                           plotChart = TRUE)
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=7, fig.align='center'}
+plot_items_spc_facet(unplanned_closures_data = unplannedClosuresData,
+                           items_data = items_dispensed,
+                           contractor_table = Ref_Contractor,
+                        level = "Regional",
+                        region_STP_name = "South West")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=7, fig.align='center'}
+plot_items_spc_facet(unplanned_closures_data = unplannedClosuresData,
+                           items_data = items_dispensed,
+                           contractor_table = Ref_Contractor,
+                        level = "Regional",
+                        region_STP_name = "North West")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=7, fig.align='center'}
+plot_items_spc_facet(unplanned_closures_data = unplannedClosuresData,
+                           items_data = items_dispensed,
+                           contractor_table = Ref_Contractor,
+                        level = "Regional",
+                        region_STP_name = "North East And Yorkshire")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=7, fig.align='center'}
+plot_items_spc_facet(unplanned_closures_data = unplannedClosuresData,
+                           items_data = items_dispensed,
+                           contractor_table = Ref_Contractor,
+                        level = "Regional",
+                        region_STP_name = "London")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=7, fig.align='center'}
+plot_items_spc_facet(unplanned_closures_data = unplannedClosuresData,
+                           items_data = items_dispensed,
+                           contractor_table = Ref_Contractor,
+                        level = "Regional",
+                        region_STP_name = "Midlands")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=7, fig.align='center'}
+plot_items_spc_facet(unplanned_closures_data = unplannedClosuresData,
+                           items_data = items_dispensed,
+                           contractor_table = Ref_Contractor,
+                        level = "Regional",
+                        region_STP_name = "East Of England")
+```
+
+
+ ]
+]
+
+[Return to contents](#contents)
+
+
+
+<!--  ```{r  echo=FALSE} -->
+<!--  xaringanExtra::use_panelset() -->
+<!--  ``` -->
+<!--   <font size="2"> -->
+<!--  .panelset[ -->
+
+<!--  .panel[.panel-name[National] -->
+
+
+<!--  ] -->
+<!--  .panel[.panel-name[South East] -->
+
+
+
+<!--  ] -->
+<!--  .panel[.panel-name[South West] -->
+
+
+
+<!--  ] -->
+<!--  .panel[.panel-name[North West] -->
+
+
+
+<!--  ] -->
+<!--  .panel[.panel-name[North East and Yorkshire] -->
+
+
+
+<!--  ] -->
+<!-- .panel[.panel-name[London] -->
+
+
+<!--  ] -->
+<!--  .panel[.panel-name[Midlands] -->
+
+
+
+<!--  ] -->
+<!--  .panel[.panel-name[East of England] -->
+
+
+
+<!--  ] -->
+<!--  ] -->
+
+
+<!-- --- -->
+
+
+
+
+
+

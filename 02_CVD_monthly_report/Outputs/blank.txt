@@ -1,0 +1,3 @@
+DO NOT Delete this file!!!
+
+It ensure the output folder can be cloned into your local R folder when cloning this repository. 
