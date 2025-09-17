@@ -141,7 +141,7 @@ plot_closures_by_month <- function(data = unplannedClosuresData,
                                 box.padding = unit(0.3, "lines")) +
       scale_x_date(date_breaks = "2 month", date_labels = "%b-%y") +
       theme(axis.text.x=element_text(angle=45,hjust=0.5,vjust=0.5))+
-      scale_y_continuous(sec.axis = sec_axis(~./scale_ratio, name = paste0("Number of closures",b))) +
+      #scale_y_continuous(sec.axis = sec_axis(~./scale_ratio, name = paste0("Number of closures",b))) +
       scale_size_manual(values = 1.5) +
       scale_colour_manual(labels = function(x) str_wrap(x, width = 30), values = colorBlindGrey8) +
       labs(title = title,
@@ -443,7 +443,7 @@ plot_closures_by_month_by_org <- function(data = unplannedClosuresData,
                                 box.padding = unit(0.3, "lines")) +
       scale_x_date(date_breaks = "2 month", date_labels = "%b-%y") +
       theme(axis.text.x=element_text(angle=45,hjust=0.5,vjust=0.5))+
-      scale_y_continuous(sec.axis = sec_axis(~./scale_ratio, name = paste0("Number of closures",b))) +
+      #scale_y_continuous(sec.axis = sec_axis(~./scale_ratio, name = paste0("Number of closures",b))) +
       scale_size_manual(values = 1.5) +
       scale_colour_manual(labels = function(x) str_wrap(x, width = 30), values = colorBlindGrey8) +
       labs(title = title,
@@ -743,7 +743,7 @@ plot_total_duration_of_closures <- function(data = unplannedClosuresData,
                                 label.size = NA,
                                 box.padding = unit(0.5, "lines")) +
       scale_x_date(date_breaks = "2 month", date_labels = "%b-%y") +
-      scale_y_continuous(sec.axis = sec_axis(~./scale_ratio, name = paste0("Hours",b))) +
+      #scale_y_continuous(sec.axis = sec_axis(~./scale_ratio, name = paste0("Hours",b))) +
       scale_size_manual(values = 1.5) +
       scale_colour_manual(labels = function(x) str_wrap(x, width = 30), values = colorBlindGrey8) +
       labs(title = "Total Duration of Unplanned Pharmacy Closures (Hours)",
@@ -868,7 +868,7 @@ plot_total_duration_of_closures_by_org <- function(data = unplannedClosuresData,
                                 label.size = NA,
                                 box.padding = unit(0.5, "lines")) +
       scale_x_date(date_breaks = "2 month", date_labels = "%b-%y") +
-      scale_y_continuous(sec.axis = sec_axis(~./scale_ratio, name = paste0("Hours",b))) +
+      #scale_y_continuous(sec.axis = sec_axis(~./scale_ratio, name = paste0("Hours",b))) +
       scale_size_manual(values = 1.5) +
       scale_colour_manual(labels = function(x) str_wrap(x, width = 30), values = colorBlindGrey8   <- c("#999999", "#E69F00", "#56B4E9", "#009E73", 
                                                                                                         "#F0E442", "#0072B2", "#D55E00", "#CC79A7")) +

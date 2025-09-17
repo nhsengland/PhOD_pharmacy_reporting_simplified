@@ -1,11 +1,15 @@
 #Render reports and maps
 ### Please note Sign-in needs to be approved every time when a new R session is launched 
+personal= "jin.tong" #Please replace!!!
+
+# Set working directory
+setwd(paste0("C:/Users/", personal,"/Documents/Rprojects/PhOD_pharmacy_reporting_simplified"))
+
 source("~/Rprojects/PhOD_pharmacy_reporting_simplified/03_Unplanned_closure/01_import_unplanned_closures_data - UDAL.R")
 
 rmarkdown::render(input = "~/Rprojects/PhOD_pharmacy_reporting_simplified/03_Unplanned_closure/rmarkdown/Unplanned_closures_monthly_pack_EXTERNAL.Rmd",
                   output_format = "xaringan::moon_reader",
-                  output_file = "~/Rprojects/PhOD_pharmacy_reporting_simplified/03_Unplanned_closure/rmarkdown/Unplanned_closures_monthly_pack_EXTERNAL_",format(Sys.Date()%m-% months(1), '%B%Y'), ".html"
-                  , envir= knitr::knit_global())
+                  output_file = "~/Rprojects/PhOD_pharmacy_reporting_simplified/03_Unplanned_closure/rmarkdown/Unplanned_closures_monthly_pack_EXTERNAL_",format(Sys.Date()%m-% months(1), '%B%Y'), ".html")
 
 
 rmarkdown::render(input = "~/Rprojects/PhOD_pharmacy_reporting_simplified/03_Unplanned_closure/rmarkdown/Unplanned_closures_monthly_pack_INTERNAL.Rmd",

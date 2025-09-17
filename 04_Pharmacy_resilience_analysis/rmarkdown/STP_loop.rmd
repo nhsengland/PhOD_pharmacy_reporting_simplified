@@ -1,0 +1,41 @@
+#### `r '{{value.to.match}}'`: SPC on items dispensed per day 
+
+```{r, echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="1">
+.panelset[
+
+.panel[.panel-name[All pharmacies]
+```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'}
+value.to.match <- '{{value.to.match}}'
+
+plot_items_dispensed_SPC(level = "STP", region_STP_name =  value.to.match)
+
+```
+
+
+]
+.panel[.panel-name[Pharmacies with closures]
+```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'}
+value.to.match <- '{{value.to.match}}'
+
+plot_items_dispensed_SPC(withClosures = "with", level = "STP", region_STP_name =  value.to.match)
+
+```
+
+
+]
+.panel[.panel-name[Pharmacies without closures]
+```{r echo=FALSE,warning=FALSE, fig.height=6, fig.width=10, fig.align='center',results='hide',fig.keep='all'}
+value.to.match <- '{{value.to.match}}'
+
+plot_items_dispensed_SPC(withClosures = "without", level = "STP", region_STP_name = value.to.match)
+
+```
+
+
+]
+]
+
+---

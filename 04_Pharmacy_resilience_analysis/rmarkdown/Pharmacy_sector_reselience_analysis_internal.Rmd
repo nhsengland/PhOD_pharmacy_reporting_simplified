@@ -1,0 +1,1918 @@
+---
+title: "Pharmacy sector resilence analysis - INTERNAL USE"
+subtitle: "Draft analysis produced by PhODs team"
+date: "`r paste(format(Sys.time(), '%B, %Y'), ' - Reporting up to end of', format(Sys.Date() - lubridate::weeks(5), '%B, %Y'))`"
+output:
+  xaringan::moon_reader:
+    css: [theme.css, nhsr-fonts.css]
+    self_contained: true
+    lib_dir: libs
+    nature:
+      ratio: '16:9'
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+```{r setup, include=FALSE}
+
+library(tidyverse)
+library(readxl)
+library(DBI)
+library(odbc)
+library(reactable) #make sure you have the latest version by doing install.packages("reactable")
+library(downloadthis)
+
+source("~/Rprojects/PhOD_pharmacy_reporting_simplified/04_Pharmacy_resilience_analysis/01 resilience_analysis.R")
+source("~/Rprojects/PhOD_pharmacy_reporting_simplified/04_Pharmacy_resilience_analysis/04 Pharm_cluster.R")
+source("~/Rprojects/PhOD_pharmacy_reporting_simplified/04_Pharmacy_resilience_analysis/05 Patient_distance.R")
+
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+#avoid standard form
+options(scipen=999)
+
+# Suppress summarise info
+options(dplyr.summarise.inform = FALSE)
+
+```
+
+
+name: contents
+### Contents  
+
+ <font size="4">
+
+ * [Summary statistics](#summary)
+ * [Registered open premises and hours (National view)](#open-premises-hours)
+ * [Registered open premises (Regional view)](#open-premises-region)
+ * [Registered open premises per 100k population (Regional view)](#open-premises-region-pop)
+ * [Registered opening hours (Regional view)](#open-hours-region)
+ * [Registered opening hours per 100k population (Regional view)](#open-hours-region-pop)
+ * [Permanent closures (National view)](#number-of-closures-national)
+ * [Permanent closures (Regional view)](#number-of-closures-regional)
+ * [Permanent closures rates (Regional view)](#rate-of-closures-regional)
+ * [Change of ownership (National view)](#coo-national)
+ * [Change of ownership (Regional view)](#coo-regional)
+ * [Change of ownership per 1000 pharmacies (Regional view)](#coo-rate-regional)
+ * [Newly opened pharmacies (National view)](#open-national)
+ * [Newly opened pharmacies (Regional view)](#open-regional)
+ * [Newly opened pharmacies per 1000 pharmacies (Regional view)](#open-rate-regional)
+ * [Market share breakdown by parent organisation size (% of total premises)](#open-market)
+ * [Market share breakdown by parent organisation size (% of weekly total hours)](#open-hours)
+ * [Market share by large multiples (National view)](#largeM)
+ * [Permanent closures breakdown by parent organisations (National view)](#largeM_closure)
+ * [Pharmacy clustering within 0.5 mile](#pharm_cluster)
+ * [Clustering of pharmacies from same parent organisation](#chain_cluster)
+ * [Patients to pharmacy (crow flies) distance (National view)](#patient_pharmacy)
+ * [Pharmacy quarterly income (National view)](#income_national)
+ * [All NHS service income including dispensing fee (Regional view)](#NHSincome_regional)
+ * [Quarterly dispensing and clinical service volume by IMD](#Service_volume)
+ * [ICB maps](#icb_map)
+
+
+
+<font size="1">
+#### NOTE 
+This is an interactive markdown report.  You can navigate from slide to slide by either clicking the mouse on the screen or by using the cursor keys.  **Press ? for help.** Some pages have selection buttons across regions, click on the region in order to explore the data for that area.  
+
+---
+
+### Note on data collection and completeness
+
+<font size="2">
+
+The data sources of this analysis include the quarterly consolidated pharmaceutical list and openings, closures, and change of ownership data. These datasets are held by NHSBSA on NHS England’s behalf and rely upon pharmacy contract team and CPE. There are known data quality issues in those data files.
+
+N.B. DAC contractors have been excluded from any analysis in this pack. LPS contractors have been included in analysis in this pack. 
+
+---
+name: summary
+
+### Summary statistics
+
+ <font size="2">
+
+* Summary stats to be added here.
+
+
+
+---
+name: open-premises-hours
+
+### Registered open premises and hours (National view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National (Year on year comparison)]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_national_1()
+```
+
+
+]
+.panel[.panel-name[Timeline view]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_national_2()
+```
+
+]
+.panel[.panel-name[by IMD Decile]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_IMD()
+```
+
+ ]
+
+]
+
+[Return to contents](#contents)
+
+---
+name: open-premises-region
+
+### Registered open premises (Regional view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[Regional timeline]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_regional("prem", "N")
+```
+
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("South East","prem", "N")
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("South West","prem", "N")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("North West","prem", "N")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("North East And Yorkshire","prem", "N")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("London","prem", "N")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("Midlands","prem", "N")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("East Of England","prem", "N")
+```
+
+ ]
+]
+
+
+[Return to contents](#contents)
+
+---
+name: open-premises-region-pop
+
+### Registered open premises per 100k population (Regional view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[Regional timeline]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_regional("prem", "Y")
+```
+
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("South East","prem", "Y")
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("South West","prem", "Y")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("North West","prem", "Y")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("North East And Yorkshire","prem", "Y")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("London","prem", "Y")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("Midlands","prem", "Y")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("East Of England","prem", "Y")
+```
+
+ ]
+  .panel[.panel-name[Data]
+
+<font size="1">
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=5}
+
+data <- get_premises_table()
+
+data %>%
+  download_this(
+    output_name = "premises_by_stp",
+    output_extension = ".xlsx",
+    button_label = "Download data",
+    button_type = "warning",
+    has_icon = TRUE,
+    icon = "fa fa-save"
+  )
+```
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5}
+reactable(
+   get_premises_table(),
+  filterable = TRUE,
+  #paginateSubRows = TRUE,
+  minRows = 5,
+  highlight = TRUE,
+  height = 450,
+  groupBy = c("Reporting Month","Region Name", "ICB Code"),
+  columns = list(
+    `Number of open premises`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE),
+    `Population`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE),
+    `Premises per 100k population` = colDef(format = colFormat(digits = 0), filterable = FALSE)
+
+  )
+)
+```
+]
+]
+
+
+[Return to contents](#contents)
+
+---
+name: open-hours-region
+
+### Registered opening hours (Regional view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[Regional timeline]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_regional("hour","N")
+```
+
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("South East","hour", "N")
+```
+
+]
+ .panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("South West","hour", "N")
+```
+
+ ]
+  .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("North West","hour", "N")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("North East And Yorkshire","hour", "N")
+```
+
+
+ ]
+  .panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("London","hour", "N")
+```
+
+
+ ]
+  .panel[.panel-name[Midlands]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("Midlands","hour", "N")
+```
+
+
+ ]
+  .panel[.panel-name[East Of England]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("East Of England","hour", "N")
+```
+
+
+ ]
+
+]
+
+
+[Return to contents](#contents)
+
+
+---
+name: open-hours-region-pop
+
+### Registered opening hours per 100k population (Regional view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[Regional timeline]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_regional("hour","Y")
+```
+
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("South East","hour","Y")
+```
+
+]
+ .panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("South West","hour","Y")
+```
+
+ ]
+  .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("North West","hour","Y")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("North East And Yorkshire","hour","Y")
+```
+
+
+ ]
+  .panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("London","hour","Y")
+```
+
+
+ ]
+  .panel[.panel-name[Midlands]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("Midlands","hour","Y")
+```
+
+
+ ]
+  .panel[.panel-name[East Of England]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB("East Of England","hour","Y")
+```
+
+
+ ]
+   .panel[.panel-name[Data]
+
+<font size="1">
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=5}
+
+data <- get_hours_table()
+
+data %>%
+  download_this(
+    output_name = "hours_by_stp",
+    output_extension = ".xlsx",
+    button_label = "Download data",
+    button_type = "warning",
+    has_icon = TRUE,
+    icon = "fa fa-save"
+  )
+```
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5}
+reactable(
+   get_hours_table(),
+  filterable = TRUE,
+  #paginateSubRows = TRUE,
+  minRows = 5,
+  highlight = TRUE,
+  height = 450,
+  groupBy = c("Reporting Month","Region Name", "ICB Code"),
+  columns = list(
+    `Weekly opening hours`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE),
+      `Population`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE),
+     `Weekly opening hours`= colDef(format = colFormat(digits = 0), filterable = FALSE)
+  )
+)
+```
+]
+]
+
+
+[Return to contents](#contents)
+
+
+---
+name: number-of-closures-national
+
+### Permanent closures (National view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_national()
+```
+
+]
+.panel[.panel-name[by IMD decile]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_IMD()
+```
+
+]
+]
+
+[Return to contents](#contents)
+
+---
+name: number-of-closures-regional
+
+### Permanent closures (Regional view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[All regions]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional_all("N")
+```
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("South East", "N")
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("South West", "N")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("North West", "N")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("North East And Yorkshire", "N")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("London", "N")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("Midlands", "N")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("East Of England", "N")
+```
+
+
+ ]
+  .panel[.panel-name[Data]
+
+<font size="1">
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=5}
+
+data <- get_closure_table()
+
+data %>%
+  download_this(
+    output_name = "closure_by_stp",
+    output_extension = ".xlsx",
+    button_label = "Download data",
+    button_type = "warning",
+    has_icon = TRUE,
+    icon = "fa fa-save"
+  )
+```
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5}
+reactable(
+   get_closure_table(),
+  filterable = TRUE,
+  #paginateSubRows = TRUE,
+  minRows = 5,
+  highlight = TRUE,
+  height = 450,
+  groupBy = c("Month of closure","Region Name", "ICB Code"),
+  columns = list(
+    `Number of Permanent closures`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE)
+  )
+)
+```
+]
+]
+
+
+[Return to contents](#contents)
+
+---
+name: rate-of-closures-regional
+
+### Permanent closures rates (Regional view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[All regions]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional_all("Y")
+```
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("South East", "Y")
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("South West", "Y")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("North West", "Y")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("North East And Yorkshire", "Y")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("London", "Y")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("Midlands", "Y")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_closure_regional("East Of England", "Y")
+```
+
+
+ ]
+]
+
+
+[Return to contents](#contents)
+
+---
+name: coo-national
+
+### Change of ownership (National view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_national()
+```
+
+]
+.panel[.panel-name[by IMD decile]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_IMD()
+```
+
+]
+]
+
+[Return to contents](#contents)
+
+---
+name: coo-regional
+
+### Change of ownership (Regional view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[All regions]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional_all("N")
+```
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("South East")
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("South West")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("North West")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("North East And Yorkshire")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("London")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("Midlands")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("East Of England")
+```
+
+
+ ]
+.panel[.panel-name[Data]
+
+<font size="1">
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=5}
+
+data <- get_coo_table()
+
+data %>%
+  download_this(
+    output_name = "COO_by_stp",
+    output_extension = ".xlsx",
+    button_label = "Download data",
+    button_type = "warning",
+    has_icon = TRUE,
+    icon = "fa fa-save"
+  )
+```
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5}
+reactable(
+   get_coo_table(),
+  filterable = TRUE,
+  #paginateSubRows = TRUE,
+  minRows = 5,
+  highlight = TRUE,
+  height = 450,
+  groupBy = c("Month of ownership change","Region Name", "ICB Code"),
+  columns = list(
+    `Number of changes of ownership`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE)
+  )
+)
+```
+]
+]
+
+[Return to contents](#contents)
+
+---
+name: coo-rate-regional
+
+### Changes of ownership per 1000 pharmacies (Regional view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[All regions]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional_all("Y")
+```
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("South East", "Y")
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("South West", "Y")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("North West", "Y")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("North East And Yorkshire", "Y")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("London", "Y")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("Midlands", "Y")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_coo_regional("East Of England", "Y")
+```
+
+
+ ]
+]
+
+[Return to contents](#contents)
+
+---
+name: open-national
+
+### Newly opened pharmacies (National view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_national()
+```
+
+]
+.panel[.panel-name[by IMD decile]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_IMD()
+```
+
+]
+]
+
+[Return to contents](#contents)
+
+---
+name: open-regional
+
+### Newly opened pharmacies (Regional view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[All regions]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional_all("N")
+```
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("South East")
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("South West")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("North West")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("North East And Yorkshire")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("London")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("Midlands")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("East Of England")
+```
+
+
+ ]
+  .panel[.panel-name[Data]
+
+<font size="1">
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=13, fig.height=5}
+
+data <- get_open_table()
+
+data %>%
+  download_this(
+    output_name = "open_by_stp",
+    output_extension = ".xlsx",
+    button_label = "Download data",
+    button_type = "warning",
+    has_icon = TRUE,
+    icon = "fa fa-save"
+  )
+```
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5}
+reactable(
+   get_open_table(),
+  filterable = TRUE,
+  #paginateSubRows = TRUE,
+  minRows = 5,
+  highlight = TRUE,
+  height = 450,
+  groupBy = c("Effective Month","Region Name", "ICB Code"),
+  columns = list(
+    `Number of new pharmacies`= colDef(aggregate = "sum", format = colFormat(digits = 0), filterable = FALSE)
+  )
+)
+```
+]
+]
+
+[Return to contents](#contents)
+
+---
+name: open-rate-regional
+
+### Newly opened pharmacies per 1000 pharmacies (Regional view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[All regions]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional_all("Y")
+```
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("South East", "Y")
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("South West", "Y")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("North West", "Y")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("North East And Yorkshire", "Y")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("London", "Y")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("Midlands", "Y")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_open_regional("East Of England", "Y")
+```
+
+
+ ]
+]
+
+[Return to contents](#contents)
+
+---
+name: open-market
+
+### Market share breakdown by parent organisation size (% of total premises)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("National","premises")
+```
+
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("South East","premises")
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("South West","premises")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("North West","premises")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("North East And Yorkshire","premises")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("London","premises")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("Midlands","premises")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("East Of England","premises")
+```
+
+
+ ]
+
+]
+
+[Return to contents](#contents)
+
+---
+name: open-hours
+
+### Market share breakdown by parent organisation size (% of weekly total hours)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("National","hours")
+```
+
+
+]
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("South East","hours")
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("South West","hours")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("North West","hours")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("North East And Yorkshire","hours")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("London","hours")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("Midlands","hours")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie1("East Of England","hours")
+```
+
+
+ ]
+
+]
+
+[Return to contents](#contents)
+
+---
+name: largeM
+
+### Market share by large multiples (National view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[Open Premises]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie2("National","premises")
+```
+
+
+]
+.panel[.panel-name[Weekly total opening hours]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie2("National","hours")
+```
+
+]
+
+]
+
+[Return to contents](#contents)
+
+---
+name: largeM_closure
+
+### Permanent closure breakdown by parent organisations (National view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National view 1]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie3("National","2023-04-01",TRUE)
+```
+
+
+]
+.panel[.panel-name[National view 2]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_pie3("National","2023-04-01",FALSE)
+```
+
+]
+
+]
+
+[Return to contents](#contents)
+
+---
+name: pharm_cluster
+
+### Pharmacy clustering within 0.5 mile (crow flies distance)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[National View]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_cluster_pie(FALSE)
+```
+
+
+]
+.panel[.panel-name[Clustering breakdown by IMD]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=12, fig.height=5, fig.align='center'}
+plot_pharmCluster("IMD", FALSE)
+```
+
+
+]
+.panel[.panel-name[Clustering breakdown by ParentOrgSize]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=12, fig.height=5, fig.align='center'}
+plot_pharmCluster("OrgSize", FALSE)
+```
+
+]
+]
+
+[Return to contents](#contents)
+
+---
+
+name: chain_cluster
+
+### Clustering of pharmacies from same parent organisation
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[All pharmacies]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_cluster_pie(TRUE)
+```
+
+
+]
+.panel[.panel-name[Clustering breakdown by IMD]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=12, fig.height=5, fig.align='center'}
+plot_pharmCluster("IMD", TRUE)
+```
+
+
+]
+.panel[.panel-name[Clustering breakdown by ParentOrgSize]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=12, fig.height=5, fig.align='center'}
+plot_pharmCluster("OrgSize", TRUE)
+```
+
+]
+]
+
+[Return to contents](#contents)
+
+---
+
+name: patient_pharmacy
+
+### Patients to pharmacy (crow flies) distance (National view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[All patients in England]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=19, fig.height=5, fig.align='center'}
+plot_patient_pie()
+```
+
+
+]
+.panel[.panel-name[Patients in each IMD decile]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=12, fig.height=5, fig.align='center'}
+plot_patients()
+```
+
+
+]
+]
+
+[Return to contents](#contents)
+
+---
+name: income_national
+
+### Pharmacy quarterly income (National view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+.panel[.panel-name[All NHS service income]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_income_national("NHS_Income")
+```
+
+]
+.panel[.panel-name[Dispensing Fee]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_income_national("DispensingFee")
+```
+
+
+]
+.panel[.panel-name[CPCF clinical service income]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_income_national("CPCFIncome")
+```
+
+]
+
+.panel[.panel-name[COVID vaccination income]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_income_national("CovidIncome")
+```
+
+]
+
+.panel[.panel-name[Flu vaccination income]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_income_national("FluIncome")
+```
+
+]
+]
+
+[Return to contents](#contents)
+
+---
+name: NHSincome_regional
+
+### All NHS service income including dispensing fee (Regional view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[South East]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=12, fig.height=5, fig.align='center'}
+plot_income_regional("NHS_Income","South East")
+```
+
+]
+.panel[.panel-name[South West]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=12, fig.height=5, fig.align='center'}
+plot_income_regional("NHS_Income","South West")
+```
+
+ ]
+ .panel[.panel-name[North West]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=12, fig.height=5, fig.align='center'}
+plot_income_regional("NHS_Income","North West")
+```
+
+
+ ]
+ .panel[.panel-name[North East and Yorkshire]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=12, fig.height=5, fig.align='center'}
+plot_income_regional("NHS_Income","North East And Yorkshire")
+```
+
+
+ ]
+.panel[.panel-name[London]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=12, fig.height=5, fig.align='center'}
+plot_income_regional("NHS_Income","London")
+```
+
+
+ ]
+ .panel[.panel-name[Midlands]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=12, fig.height=5, fig.align='center'}
+plot_income_regional("NHS_Income","Midlands")
+```
+
+
+ ]
+ .panel[.panel-name[East of England]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=12, fig.height=5, fig.align='center'}
+plot_income_regional("NHS_Income","East Of England")
+```
+
+
+ ]
+]
+
+[Return to contents](#contents)
+
+---
+name: Service_volume
+
+### Quarterly total service volume (National view)
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+.panel[.panel-name[Dispensing]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD("Items Dispensed")
+```
+
+]
+
+.panel[.panel-name[DMS]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD("Discharge Medicine Service Activity")
+```
+
+]
+.panel[.panel-name[NMS]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD("New Medicine Service (NMS) Activity")
+```
+
+]
+
+.panel[.panel-name[CPCS]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Community Pharmacist Consultation Service (CPCS) Activity")
+```
+
+]
+.panel[.panel-name[PF MI&UMS]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD("Pharmacy First MI & UMS Consultation Activity")
+```
+
+]
+.panel[.panel-name[PF clinical pathways]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Pharmacy First Clinical Pathways Consultation Activity")
+```
+
+]
+.panel[.panel-name[Contraception]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD("Oral Contraception Consultation Activity")
+```
+
+]
+
+.panel[.panel-name[SMS]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD("Stop Smoking Service Activity")
+```
+
+]
+.panel[.panel-name[AUR]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD("Appliance Use Reviews (AUR) Activity")
+```
+
+
+]
+
+.panel[.panel-name[STOMA]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD("Stoma Customisation (STOMA) Activity")
+```
+
+]
+.panel[.panel-name[FLu Vac]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD("Seasonal Influenza Vaccination Advances Service (FLU) Activity")
+```
+
+]
+
+.panel[.panel-name[Covid Vac]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD("Covid Vaccination Service Activity")
+```
+
+]
+.panel[.panel-name[MUR]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD("Medicine Use Review and Prescription Intervention Service (MUR) Activity")
+```
+
+]
+
+.panel[.panel-name[Hep C]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD("Hepatitis C Antibody Testing Service Activity")
+```
+
+]
+]
+
+[Return to contents](#contents)
+
+---
+### Quaterly average service volume per pharmacy
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+.panel[.panel-name[Dispensing]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Items Dispensed")
+```
+
+]
+
+.panel[.panel-name[DMS]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Discharge Medicine Service Activity")
+```
+
+]
+.panel[.panel-name[NMS]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("New Medicine Service (NMS) Activity")
+```
+
+]
+
+.panel[.panel-name[CPCS]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Community Pharmacist Consultation Service (CPCS) Activity")
+```
+
+]
+.panel[.panel-name[PF MI&UMS]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Pharmacy First MI & UMS Consultation Activity")
+```
+
+]
+.panel[.panel-name[PF clinical pathways]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Pharmacy First Clinical Pathways Consultation Activity")
+```
+
+]
+.panel[.panel-name[Contraception]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Oral Contraception Consultation Activity")
+```
+
+]
+
+.panel[.panel-name[SMS]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Stop Smoking Service Activity")
+```
+
+]
+.panel[.panel-name[AUR]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Appliance Use Reviews (AUR) Activity")
+```
+
+
+]
+
+.panel[.panel-name[STOMA]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Stoma Customisation (STOMA) Activity")
+```
+
+]
+.panel[.panel-name[FLu Vac]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Seasonal Influenza Vaccination Advances Service (FLU) Activity")
+```
+
+]
+
+.panel[.panel-name[Covid Vac]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Covid Vaccination Service Activity")
+```
+
+]
+.panel[.panel-name[MUR]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Medicine Use Review and Prescription Intervention Service (MUR) Activity")
+```
+
+]
+
+.panel[.panel-name[Hep C]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=15, fig.height=5, fig.align='center'}
+plot_activity_IMD_avg("Hepatitis C Antibody Testing Service Activity")
+```
+
+]
+
+]
+
+[Return to contents](#contents)
+
+---
+name: icb_map
+
+### ICB maps
+
+```{r  echo=FALSE}
+xaringanExtra::use_panelset()
+```
+ <font size="2">
+.panelset[
+
+.panel[.panel-name[Open Premises]
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB_map(FALSE, "premises")
+```
+
+]
+.panel[.panel-name[Registered opening hours]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB_map(FALSE, "hours")
+```
+
+]
+.panel[.panel-name[Permanent closures]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB_map(FALSE, "closure")
+```
+
+ ]
+ .panel[.panel-name[Change of ownership]
+
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB_map(FALSE, "coo")
+```
+
+
+ ]
+ .panel[.panel-name[Newly opened pharmacies]
+
+```{r echo = FALSE, warning = FALSE, message = FALSE, fig.width=14, fig.height=5, fig.align='center'}
+plot_ICB_map(FALSE, "open")
+```
+
+
+ ]
+]
+
+[Return to contents](#contents)
+
+---
+
+
+
+
+
+
