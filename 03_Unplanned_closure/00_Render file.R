@@ -3,9 +3,13 @@
 personal= "jin.tong" #Please replace!!!
 
 # Set working directory
-setwd(paste0("C:/Users/", personal,"/Documents/Rprojects/PhOD_pharmacy_reporting_simplified"))
+setwd(paste0("C:/Users/", personal,"/Documents/Rprojects/PhOD_pharmacy_reporting_simplified/03_Unplanned_closure"))
 
 source("~/Rprojects/PhOD_pharmacy_reporting_simplified/03_Unplanned_closure/01_import_unplanned_closures_data - UDAL.R")
+
+print(paste0("Excel output saved as [collated_unplanned_closures_data_Oct21_", data_date, "_INTERNAL.xlsx] at C:/Users/", personal,"/OneDrive - NHS/PHARM-2022_23-003 Unplanned closures/Monthly data and reporting/Collated data/Internal stakeholders"))
+print(paste0("Excel output saved as [collated_unplanned_closures_data_Oct21_", data_date, "_External.xlsx] at C:/Users/", personal,"/OneDrive - NHS/PHARM-2022_23-003 Unplanned closures/Monthly data and reporting/Collated data/External stakeholders"))
+print(paste0("A master excel data file saved as [unplannedClosuresData.xlsx] at C:/Users/", personal,"/OneDrive - NHS/PHARM-2022_23-003 Unplanned closures/Monthly data and reporting/Collated data"))
 
 rmarkdown::render(input = "~/Rprojects/PhOD_pharmacy_reporting_simplified/03_Unplanned_closure/rmarkdown/Unplanned_closures_monthly_pack_EXTERNAL.Rmd",
                   output_format = "xaringan::moon_reader",
